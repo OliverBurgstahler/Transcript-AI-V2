@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Transcript Extractor</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .transcript-container {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid var(--bs-border-color);
+            border-radius: 0.375rem;
+            padding: 1rem;
+            background-color: var(--bs-body-bg);
+        }
+        
+        .loading-spinner {
+            display: none;
+        }
+        
+        .copy-button {
+            position: relative;
+        }
+        
+        .copy-feedback {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--bs-success);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .copy-feedback.show {
+            opacity: 1;
+        }
+        
+        .url-input-group {
+            position: relative;
+        }
+        
+        .url-validation {
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .format-options {
+            display: none;
+        }
+        
+        .format-options.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h1 class="display-4 mb-3">
+                    <i class="fab fa-youtube text-danger me-3"></i>
+                    YouTube Transcript Extractor
+                </h1>
+                <p class="lead text-muted">
+                    Extract transcripts from YouTube videos with reliable proxy rotation
+                </p>
+            </div>
+        </div>
+
+        <!-- Main Form -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <form id="transcriptForm">
+                            <!-- URL Input -->
+                            <div class="mb-4">
+                                <label for="youtubeUrl" class="form-label fw-bold">
+                                    <i class="fas fa-link me-2"></i>YouTube URL
+                                </label>
+                                <div class="url-input-group">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fab fa-youtube text-danger"></i>
+                                        </span>
+                                        <input 
+                                            type="url" 
+                                            class="form-control form-control-lg" 
+                                            id="youtubeUrl" 
+                                            placeholder="https://www.youtube.com/watch?v=..." 
+                                            required
+                                        >
+                                        <button 
+                                            type="submit" 
+                                            class="btn btn-secondary" 
+                                            id="extractBtn"
+                                        >
+                                            <span class="loading-spinner">
+                                                <i class="fas fa-spinner fa-spin me-2"></i>
+                                            </span>
+                                            <span class="btn-text">
+                                                <i class="fas fa-download me-2"></i>Extract
+                                            </span>
+                                        </button>
+                                    </div>
+                                    <div class="url-validation text-success" id="urlValidation"></div>
+                                </div>
+                                <div class="form-text">
+                                    Supports various YouTube URL formats (youtube.com, youtu.be, m.youtube.com)
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Format Options -->
+                        <div class="format-options mb-4" id="formatOptions">
+                            <h6 class="fw-bold mb-3">
+                                <i class="fas fa-cog me-2"></i>Format Options
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="formatType" id="continuous" value="continuous" checked>
+                                        <label class="form-check-label" for="continuous">
+                                            Continuous Text
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="formatType" id="paragraphs" value="paragraphs">
+                                        <label class="form-check-label" for="paragraphs">
+                                            Paragraph Format
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alert Area -->
+                        <div id="alertArea"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transcript Results -->
+        <div class="row justify-content-center mt-4" id="resultsSection" style="display: none;">
+            <div class="col-lg-10">
+                <div class="card shadow">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-text me-2"></i>Transcript
+                        </h5>
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm copy-button me-2" id="copyBtn">
+                                <i class="fas fa-copy me-1"></i>Copy
+                                <div class="copy-feedback" id="copyFeedback">Copied!</div>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="clearBtn">
+                                <i class="fas fa-trash me-1"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="transcript-container" id="transcriptContent">
+                            <!-- Transcript will be loaded here -->
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Word count: <span id="wordCount">0</span> | 
+                                Character count: <span id="charCount">0</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // DOM Elements
+        const form = document.getElementById('transcriptForm');
+        const urlInput = document.getElementById('youtubeUrl');
+        const extractBtn = document.getElementById('extractBtn');
+        const loadingSpinner = document.querySelector('.loading-spinner');
+        const btnText = document.querySelector('.btn-text');
+        const alertArea = document.getElementById('alertArea');
+        const resultsSection = document.getElementById('resultsSection');
+        const transcriptContent = document.getElementById('transcriptContent');
+        const formatOptions = document.getElementById('formatOptions');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const copyFeedback = document.getElementById('copyFeedback');
+        const wordCount = document.getElementById('wordCount');
+        const charCount = document.getElementById('charCount');
+        const urlValidation = document.getElementById('urlValidation');
+
+        let currentTranscript = '';
+
+        // YouTube URL validation
+        function isValidYouTubeUrl(url) {
+            const regex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/)|youtu\.be\/|m\.youtube\.com\/watch\?v=)[a-zA-Z0-9_-]{11}/;
+            return regex.test(url);
+        }
+
+        // URL input validation
+        urlInput.addEventListener('input', function() {
+            const url = this.value.trim();
+            if (url && isValidYouTubeUrl(url)) {
+                urlValidation.textContent = '✓ Valid YouTube URL';
+                urlValidation.className = 'url-validation text-success';
+                extractBtn.disabled = false;
+            } else if (url) {
+                urlValidation.textContent = '✗ Invalid YouTube URL format';
+                urlValidation.className = 'url-validation text-danger';
+                extractBtn.disabled = true;
+            } else {
+                urlValidation.textContent = '';
+                extractBtn.disabled = false;
+            }
+        });
+
+        // Show alert
+        function showAlert(message, type = 'danger') {
+            alertArea.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-${type === 'danger' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+
+        // Clear alerts
+        function clearAlerts() {
+            alertArea.innerHTML = '';
+        }
+
+        // Set loading state
+        function setLoading(loading) {
+            if (loading) {
+                loadingSpinner.style.display = 'inline';
+                btnText.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                extractBtn.disabled = true;
+                urlInput.disabled = true;
+            } else {
+                loadingSpinner.style.display = 'none';
+                btnText.innerHTML = '<i class="fas fa-download me-2"></i>Extract';
+                extractBtn.disabled = false;
+                urlInput.disabled = false;
+            }
+        }
+
+        // Format transcript
+        function formatTranscript(text, formatType) {
+            if (formatType === 'paragraphs') {
+                // Split into sentences and group into paragraphs
+                const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                let paragraphs = [];
+                let currentParagraph = [];
+                
+                sentences.forEach((sentence, index) => {
+                    currentParagraph.push(sentence.trim());
+                    if (currentParagraph.length >= 3 || index === sentences.length - 1) {
+                        paragraphs.push(currentParagraph.join('. ') + '.');
+                        currentParagraph = [];
+                    }
+                });
+                
+                return paragraphs.map(p => `<p class="mb-3">${p}</p>`).join('');
+            }
+            return `<p>${text}</p>`;
+        }
+
+        // Update word and character counts
+        function updateCounts(text) {
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            wordCount.textContent = words.length;
+            charCount.textContent = text.length;
+        }
+
+        // Display transcript
+        function displayTranscript(transcript) {
+            currentTranscript = transcript;
+            const formatType = document.querySelector('input[name="formatType"]:checked').value;
+            const formattedTranscript = formatTranscript(transcript, formatType);
+            
+            transcriptContent.innerHTML = formattedTranscript;
+            updateCounts(transcript);
+            resultsSection.style.display = 'block';
+            formatOptions.classList.add('show');
+            
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Handle form submission
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const url = urlInput.value.trim();
+            if (!url) {
+                showAlert('Please enter a YouTube URL');
+                return;
+            }
+
+            if (!isValidYouTubeUrl(url)) {
+                showAlert('Please enter a valid YouTube URL');
+                return;
+            }
+
+            clearAlerts();
+            setLoading(true);
+
+            try {
+                const response = await fetch('/transcript', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    displayTranscript(data.transcript);
+                    showAlert('Transcript extracted successfully!', 'success');
+                } else {
+                    showAlert(data.error || 'Failed to extract transcript');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('Network error occurred. Please check your connection and try again.');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        // Handle format change
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'formatType' && currentTranscript) {
+                const formatType = e.target.value;
+                const formattedTranscript = formatTranscript(currentTranscript, formatType);
+                transcriptContent.innerHTML = formattedTranscript;
+            }
+        });
+
+        // Copy to clipboard
+        copyBtn.addEventListener('click', async function() {
+            if (!currentTranscript) return;
+
+            try {
+                await navigator.clipboard.writeText(currentTranscript);
+                copyFeedback.classList.add('show');
+                setTimeout(() => {
+                    copyFeedback.classList.remove('show');
+                }, 2000);
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = currentTranscript;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                copyFeedback.classList.add('show');
+                setTimeout(() => {
+                    copyFeedback.classList.remove('show');
+                }, 2000);
+            }
+        });
+
+        // Clear results
+        clearBtn.addEventListener('click', function() {
+            resultsSection.style.display = 'none';
+            formatOptions.classList.remove('show');
+            currentTranscript = '';
+            clearAlerts();
+            urlInput.value = '';
+            urlValidation.textContent = '';
+        });
+
+        // Auto-focus URL input
+        urlInput.focus();
+    </script>
+</body>
+</html>
