@@ -102,4 +102,8 @@ def debug_env():
         "proxies_count": len(PROXIES)
     }
 
+@app.route("/ads.txt")
+def ads_txt():
+    return send_from_directory(".", "ads.txt", mimetype="text/plain")
+
 
