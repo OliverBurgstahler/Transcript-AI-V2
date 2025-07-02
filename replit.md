@@ -78,7 +78,8 @@ The application is designed for simple deployment:
 
 ## Changelog
 
-- July 02, 2025. Initial setup
+- July 02, 2025: Initial setup with Flask backend and Bootstrap frontend
+- July 02, 2025: Added centered transcript display and .txt download functionality
 
 ## User Preferences
 

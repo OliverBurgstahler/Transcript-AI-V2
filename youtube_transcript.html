@@ -14,6 +14,7 @@
             border-radius: 0.375rem;
             padding: 1rem;
             background-color: var(--bs-body-bg);
+            text-align: center;
         }
         
         .loading-spinner {
@@ -164,6 +165,9 @@
                                 <i class="fas fa-copy me-1"></i>Copy
                                 <div class="copy-feedback" id="copyFeedback">Copied!</div>
                             </button>
+                            <button type="button" class="btn btn-outline-success btn-sm me-2" id="downloadBtn">
+                                <i class="fas fa-download me-1"></i>Download .txt
+                            </button>
                             <button type="button" class="btn btn-outline-secondary btn-sm" id="clearBtn">
                                 <i class="fas fa-trash me-1"></i>Clear
                             </button>
@@ -201,6 +205,7 @@
         const transcriptContent = document.getElementById('transcriptContent');
         const formatOptions = document.getElementById('formatOptions');
         const copyBtn = document.getElementById('copyBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
         const clearBtn = document.getElementById('clearBtn');
         const copyFeedback = document.getElementById('copyFeedback');
         const wordCount = document.getElementById('wordCount');
@@ -382,6 +387,21 @@
                     copyFeedback.classList.remove('show');
                 }, 2000);
             }
+        });
+
+        // Download transcript as .txt file
+        downloadBtn.addEventListener('click', function() {
+            if (!currentTranscript) return;
+
+            const blob = new Blob([currentTranscript], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'youtube-transcript.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         });
 
         // Clear results
