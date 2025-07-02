@@ -1,8 +1,8 @@
-# YouTube Transcript Extractor
+# YouTube Transcript Downloader
 
 ## Overview
 
-This application is a YouTube Transcript Extractor that allows users to extract transcripts from YouTube videos. It consists of a Flask backend API that fetches transcripts using the YouTube Transcript API with proxy support, and a web frontend that provides a user-friendly interface for inputting YouTube URLs and displaying extracted transcripts.
+This application is a YouTube Transcript Downloader that allows users to download transcripts from YouTube videos. It consists of a Flask backend API that fetches transcripts using the YouTube Transcript API with proxy support, and a web frontend that provides a user-friendly interface for inputting YouTube URLs and displaying extracted transcripts.
 
 ## System Architecture
 
@@ -80,6 +80,7 @@ The application is designed for simple deployment:
 
 - July 02, 2025: Initial setup with Flask backend and Bootstrap frontend
 - July 02, 2025: Added centered transcript display and .txt download functionality
+- July 02, 2025: Renamed application to "YouTube Transcript Downloader" throughout interface
 
 ## User Preferences
 
