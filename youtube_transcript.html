@@ -82,9 +82,25 @@
             background-color: var(--bs-body-bg);
             border: 2px dashed var(--bs-border-color);
             border-radius: 0.25rem;
-            padding: 2rem;
+            padding: 1rem;
             color: var(--bs-secondary);
             font-size: 0.875rem;
+            min-height: 250px;
+        }
+        
+        .sidebar-ads {
+            position: sticky;
+            top: 20px;
+        }
+        
+        .sidebar-ad {
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 991px) {
+            .sidebar-ads {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -103,22 +119,35 @@
             </div>
         </div>
 
-        <!-- Top Advertisement -->
-        <div class="row justify-content-center mb-4">
-            <div class="col-lg-8">
-                <div class="ad-container">
-                    <div class="ad-placeholder" id="topAd">
-                        <!-- Google AdSense or other ad network code goes here -->
-                        <div>Advertisement Space (728x90)</div>
-                        <small class="text-muted">Replace with your ad network code</small>
+        <!-- Main Content with Sidebar Ads -->
+        <div class="row">
+            <!-- Left Sidebar Ads -->
+            <div class="col-lg-2 d-none d-lg-block">
+                <div class="sidebar-ads">
+                    <div class="sidebar-ad">
+                        <div class="ad-container">
+                            <div class="ad-placeholder" id="leftAd1">
+                                <div>Ad Space</div>
+                                <div>160x600</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sidebar-ad">
+                        <div class="ad-container">
+                            <div class="ad-placeholder" id="leftAd2">
+                                <div>Ad Space</div>
+                                <div>160x600</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Main Form -->
-        <div class="row justify-content-center">
+            <!-- Main Content -->
             <div class="col-lg-8">
+                <!-- Main Form -->
+                <div class="row justify-content-center">
+                    <div class="col-12">
                 <div class="card shadow">
                     <div class="card-body p-4">
                         <form id="transcriptForm">
@@ -192,22 +221,9 @@
             </div>
         </div>
 
-        <!-- Middle Advertisement -->
-        <div class="row justify-content-center mt-4">
-            <div class="col-lg-8">
-                <div class="ad-container">
-                    <div class="ad-placeholder" id="middleAd">
-                        <!-- Google AdSense or other ad network code goes here -->
-                        <div>Advertisement Space (320x250)</div>
-                        <small class="text-muted">Replace with your ad network code</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Transcript Results -->
-        <div class="row justify-content-center mt-4" id="resultsSection" style="display: none;">
-            <div class="col-lg-8">
+                <!-- Transcript Results -->
+                <div class="row justify-content-center mt-4" id="resultsSection" style="display: none;">
+                    <div class="col-12">
                 <div class="card shadow">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
@@ -238,18 +254,29 @@
                             </small>
                         </div>
                     </div>
+                    </div>
                 </div>
             </div>
-        </div>
+            </div>
 
-        <!-- Bottom Advertisement -->
-        <div class="row justify-content-center mt-4">
-            <div class="col-lg-8">
-                <div class="ad-container">
-                    <div class="ad-placeholder" id="bottomAd">
-                        <!-- Google AdSense or other ad network code goes here -->
-                        <div>Advertisement Space (728x90)</div>
-                        <small class="text-muted">Replace with your ad network code</small>
+            <!-- Right Sidebar Ads -->
+            <div class="col-lg-2 d-none d-lg-block">
+                <div class="sidebar-ads">
+                    <div class="sidebar-ad">
+                        <div class="ad-container">
+                            <div class="ad-placeholder" id="rightAd1">
+                                <div>Ad Space</div>
+                                <div>160x600</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sidebar-ad">
+                        <div class="ad-container">
+                            <div class="ad-placeholder" id="rightAd2">
+                                <div>Ad Space</div>
+                                <div>160x600</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
