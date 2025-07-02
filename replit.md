@@ -82,6 +82,7 @@ The application is designed for simple deployment:
 - July 02, 2025: Added centered transcript display and .txt download functionality
 - July 02, 2025: Renamed application to "YouTube Transcript Downloader" throughout interface
 - July 02, 2025: Added sidebar advertisement layout with 4 ad spaces (2 left, 2 right)
+- July 02, 2025: Integrated Google AdSense with client ID ca-pub-9364982353236204
 
 ## User Preferences
 
