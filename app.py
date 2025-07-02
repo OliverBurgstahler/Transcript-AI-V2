@@ -1,4 +1,5 @@
 import random
+import os
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from youtube_transcript_api import YouTubeTranscriptApi
@@ -8,6 +9,7 @@ import requests
 
 app = Flask(__name__)
 CORS(app)
+app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 
 # Proxy list based on the data you provided
 PROXIES = [
@@ -100,10 +102,4 @@ def debug_env():
         "proxies_count": len(PROXIES)
     }
 
-if __name__ == "__main__":
-    print("Starting Flask app...")
-    test_proxy()
-    print("Routes registered:")
-    for rule in app.url_map.iter_rules():
-        print(f"  {rule.rule} -> {rule.endpoint}")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+
