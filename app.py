@@ -19,91 +19,36 @@ PROXIES = [
     {"ip": "107.172.163.27", "port": 6543, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
     {"ip": "216.10.27.159", "port": 6837, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
     {"ip": "136.0.207.84", "port": 6661, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
-    {"ip": "64.64.118.149", "port": 6732, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
-    {"ip": "142.147.128.93", "port": 6593, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
-    {"ip": "104.239.105.125", "port": 6655, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
-    {"ip": "206.41.172.74", "port": 6634, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
+    {"ip": "104.223.160.151", "port": 5930, "username": "xofzzxzh", "password": "55ttpq0bfwb4"}
 ]
 
-def pick_random_proxy():
-    if not PROXIES:
-        return None
-    return random.choice(PROXIES)
-
-def extract_video_id(url):
-    regex = r"(?:v=|\/)([0-9A-Za-z_-]{11}).*"
-    match = re.search(regex, url)
-    return match.group(1) if match else None
-
-def test_proxy():
-    proxy = pick_random_proxy()
-    if not proxy:
-        print("No proxies configured, skipping proxy test")
-        return
-
-    proxy_url = f"http://{proxy['username']}:{proxy['password']}@{proxy['ip']}:{proxy['port']}"
-    proxies = {
-        'http': proxy_url,
-        'https': proxy_url,
-    }
-    try:
-        r = requests.get("http://httpbin.org/ip", proxies=proxies, timeout=10)
-        print(f"Proxy test successful with proxy {proxy['ip']}, your IP via proxy: {r.text}")
-    except Exception as e:
-        print(f"Proxy test failed with proxy {proxy['ip']}: {e}")
-
 def get_transcript(video_id):
-    proxy = pick_random_proxy()
-    try:
-        if proxy:
-            proxy_config = WebshareProxyConfig(proxy['username'], proxy['password'], proxy['ip'], proxy['port'])
-            print(f"Using proxy: http://{proxy['username']}:{proxy['password']}@{proxy['ip']}:{proxy['port']}")
-            ytt_api = YouTubeTranscriptApi(proxy_config=proxy_config)
-            transcript = ytt_api.get_transcript(video_id)
-        else:
-            print("No proxy config found, trying direct connection.")
-            transcript = YouTubeTranscriptApi.get_transcript(video_id)
-
-        return " ".join([t['text'] for t in transcript])
-    except Exception as e:
-        print(f"Transcript error for video_id={video_id}: {e}")
-        return None
-
-@app.route("/")
-def home():
-    return send_from_directory(".", "youtube_transcript.html")
+    for proxy in PROXIES:
+        try:
+            config = WebshareProxyConfig(
+                proxy_host=proxy["ip"],
+                proxy_port=proxy["port"],
+                proxy_username=proxy["username"],
+                proxy_password=proxy["password"]
+            )
+            transcript = YouTubeTranscriptApi.get_transcript(video_id, proxies=config.get_proxy())
+            return transcript
+        except Exception as e:
+            continue
+    return {"error": "Unable to fetch transcript with available proxies."}
 
 @app.route("/transcript", methods=["POST"])
-def handle_transcript():
-    print("Transcript endpoint called")
+def transcript():
     data = request.get_json()
-    if not data:
-        return jsonify({"error": "No JSON data provided"}), 400
-
-    url = data.get("url")
-    if not url:
-        return jsonify({"error": "No URL provided"}), 400
-
-    video_id = extract_video_id(url)
-    print(f"extract_video_id: url={url} -> video_id={video_id}")
-    if not video_id:
+    url = data.get("url", "")
+    video_id_match = re.search(r"(?:v=|youtu\.be/)([\w-]{11})", url)
+    if not video_id_match:
         return jsonify({"error": "Invalid YouTube URL"}), 400
+    video_id = video_id_match.group(1)
+    transcript_data = get_transcript(video_id)
+    return jsonify(transcript_data)
 
-    transcript_text = get_transcript(video_id)
-    if not transcript_text:
-        return jsonify({"error": "Transcript not found"}), 404
-
-    return jsonify({"transcript": transcript_text})
-
-@app.route("/debug-env")
-def debug_env():
-    # Return the current proxy selected for debugging if you want
-    return {
-        "proxies_count": len(PROXIES)
-    }
-
-@app.route("/ads.txt")
-def ads_txt():
-    return send_from_directory(".", "ads.txt", mimetype="text/plain")
-
+@app.route("/")
+def index():
+    return "Transcript AI is running!"
 
