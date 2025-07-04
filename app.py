@@ -25,7 +25,12 @@ PROXIES = [
     {"ip": "107.172.163.27", "port": 6543, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
     {"ip": "216.10.27.159", "port": 6837, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
     {"ip": "136.0.207.84", "port": 6661, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
-    {"ip": "104.223.160.151", "port": 5930, "username": "xofzzxzh", "password": "55ttpq0bfwb4"}
+    {"ip": "104.223.160.151", "port": 5930, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
+    # add new proxies here:
+    {"ip": "64.64.118.149", "port": 6732, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
+    {"ip": "142.147.128.93", "port": 6593, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
+    {"ip": "104.239.105.125", "port": 6655, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
+    {"ip": "206.41.172.74", "port": 6634, "username": "xofzzxzh", "password": "55ttpq0bfwb4"},
 ]
 
 def get_transcript(video_id):
