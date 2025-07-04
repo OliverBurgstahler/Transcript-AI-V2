@@ -8,7 +8,13 @@ import re
 import requests
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/*": {
+        "origins": ["*"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 
 # Proxy list based on the data you provided
@@ -39,18 +45,37 @@ def get_transcript(video_id):
 
 @app.route("/transcript", methods=["POST"])
 def transcript():
-    data = request.get_json()
-    url = data.get("url", "")
-    video_id_match = re.search(r"(?:v=|youtu\.be/)([\w-]{11})", url)
-    if not video_id_match:
-        return jsonify({"error": "Invalid YouTube URL"}), 400
-    video_id = video_id_match.group(1)
-    transcript_data = get_transcript(video_id)
-    return jsonify(transcript_data)
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        url = data.get("url", "")
+        if not url:
+            return jsonify({"error": "No URL provided"}), 400
+        
+        video_id_match = re.search(r"(?:v=|youtu\.be/)([\w-]{11})", url)
+        if not video_id_match:
+            return jsonify({"error": "Invalid YouTube URL"}), 400
+        
+        video_id = video_id_match.group(1)
+        transcript_data = get_transcript(video_id)
+        
+        if isinstance(transcript_data, dict) and "error" in transcript_data:
+            return jsonify(transcript_data), 500
+        
+        return jsonify({"success": True, "transcript": transcript_data})
+        
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 @app.route("/")
 def index():
     return render_template('youtube_transcript.html')
+
+@app.route("/test", methods=["GET", "POST"])
+def test():
+    return jsonify({"message": "Server is working!", "method": request.method})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
