@@ -465,30 +465,65 @@
             clearAlerts();
             setLoading(true);
 
-            try {
-                const response = await fetch('/transcript', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url: url })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    displayTranscript(data.transcript);
-                    showAlert('Transcript extracted successfully!', 'success');
-                } else {
-                    showAlert(data.error || 'Failed to extract transcript');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('Network error occurred. Please check your connection and try again.');
-            } finally {
-                setLoading(false);
-            }
-        });
+    try {
+    console.log('Making request to /transcript with URL:', url);
+    
+    const response = await fetch('/transcript', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: url })
+    });
+    
+    console.log('Response status:', response.status);
+    console.log('Response headers:', response.headers);
+    
+    // Check if response is valid JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
+    }
+    
+    const data = await response.json();
+    console.log('Response data:', data);
+    
+    if (response.ok) {
+        // Handle successful response
+        if (data.success && data.transcript) {
+            displayTranscript(data.transcript);
+            showAlert('Transcript extracted successfully!', 'success');
+        } else if (data.transcript) {
+            // Handle case where transcript is returned without success flag
+            displayTranscript(data.transcript);
+            showAlert('Transcript extracted successfully!', 'success');
+        } else {
+            showAlert(data.error || 'No transcript data received');
+        }
+    } else {
+        // Handle HTTP error responses
+        const errorMessage = data.error || `Server error: ${response.status} ${response.statusText}`;
+        showAlert(errorMessage);
+        console.error('Server error:', errorMessage);
+    }
+    
+} catch (error) {
+    console.error('Full error details:', error);
+    
+    // More specific error messages
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        showAlert('Network connection failed. Please check your internet connection and try again.');
+    } else if (error.name === 'SyntaxError' && error.message.includes('JSON')) {
+        showAlert('Server returned invalid response. Please try again.');
+    } else if (error.message.includes('non-JSON response')) {
+        showAlert('Server error: Invalid response format. Please try again.');
+    } else {
+        showAlert(`Network error: ${error.message}. Please try again.`);
+    }
+    
+} finally {
+    setLoading(false);
+}
 
         // Handle format change
         document.addEventListener('change', function(e) {
